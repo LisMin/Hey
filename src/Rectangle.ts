@@ -14,7 +14,7 @@ namespace HEY{
         gl:WebGLRenderingContext = null;
 
         constructor(){
-            let gl = HEY.gl;
+            let gl = Scene.gl;
 
             let vertices = new Float32Array([
                 //position     //colors        //uvs
@@ -70,12 +70,12 @@ namespace HEY{
             let image = document.createElement("img");
             image.src = "../asset/wall.jpg";
             image.onload = function(data:any){
-                console.log("====",data);
                 gl.bindTexture(gl.TEXTURE_2D,texture);
                 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,data.target);
             }
 
             gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
+            gl.generateMipmap(gl.TEXTURE_2D);
 
             gl.bindTexture(gl.TEXTURE_2D,null);
 

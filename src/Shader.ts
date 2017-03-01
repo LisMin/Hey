@@ -10,7 +10,7 @@ namespace HEY{
 
         constructor(v:string,f:string){
 
-            let gl = HEY.gl;
+            let gl = Scene.gl;
 
             let vertexShader = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vertexShader,v);
