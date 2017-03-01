@@ -4,7 +4,11 @@
 
 namespace HEY{
 
-    export function test(){
+    export let gl:any = null;
+    let vao:number = null;
+    let program:WebGLProgram = null;
+
+    export function init( ){
 
         let vertices = new Float32Array([
             -0.5, -0.5, 0.0,
@@ -16,14 +20,10 @@ namespace HEY{
         canvas.height = window.innerHeight;
 
         let renderer = new WebGL2Renderer({canvas:canvas});
-        let gl = renderer.gl;
-
-        let buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-        gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+        gl = renderer.gl;
 
         let vertexShader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vertexShader,Shaders.v_default);
+        gl.shaderSource(vertexShader,ShaderLib.v_default);
         gl.compileShader(vertexShader);
 
         let succ = gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS);
@@ -34,7 +34,7 @@ namespace HEY{
         }
 
         let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fragmentShader,Shaders.f_default);
+        gl.shaderSource(fragmentShader,ShaderLib.f_default);
         gl.compileShader(fragmentShader);
 
         succ = gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS);
@@ -44,7 +44,7 @@ namespace HEY{
             return;
         }
 
-        let program = gl.createProgram();
+        program = gl.createProgram();
         gl.attachShader(program,vertexShader);
         gl.attachShader(program,fragmentShader);
         gl.linkProgram(program);
@@ -56,14 +56,31 @@ namespace HEY{
             return;
         }
         gl.deleteShader(vertexShader);
-        gl.deleteShader(fragmentShader);
-        gl.useProgram(program);
+        gl.deleteShader(fragmentShader );
 
+        vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
 
+        let buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+
+        gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
+        gl.enableVertexAttribArray(0);
+
+        gl.bindVertexArray(null);
+
+        return;
 
     }
 
+    export function render(){
+        gl.bindVertexArray(vao);
+        gl.useProgram(program);
 
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.bindVertexArray(null);
+    }
 
 
 
