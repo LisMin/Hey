@@ -5,6 +5,7 @@
 
 namespace HEY{
 
+    import Matrix4 = THREE.Matrix4;
     let vertices = new Float32Array([
         -0.5, -0.5, -0.5,  0.0, 0.0,
         0.5, -0.5, -0.5,  1.0, 0.0,
@@ -64,7 +65,9 @@ namespace HEY{
         loc_projection:number = -1;
 
         deltaX:number = 0;
-        constructor(){
+
+        translate_matrix:Matrix4 = new THREE.Matrix4();
+        constructor( ){
             this.initVAO();
             this.initTextures();
             this.initProgram();
@@ -142,9 +145,11 @@ namespace HEY{
             let model_matrix = new THREE.Matrix4();
             model_matrix.makeScale(50,50,50);
             let rotate_matrix = new THREE.Matrix4();
-            rotate_matrix.makeRotationX(this.deltaX);
-
-            gl.uniformMatrix4fv(this.loc_model,false,model_matrix.multiply(rotate_matrix).elements);
+            // rotate_matrix.makeRotationX(this.deltaX);
+            let translation_matrix = this.translate_matrix.clone();
+            // translation_matrix.makeTranslation(50,0,0);
+            gl.uniformMatrix4fv(this.loc_model,false,translation_matrix.multiply(rotate_matrix)
+                .multiply(model_matrix).elements);
 
             let view_matrix = new THREE.Matrix4();
             view_matrix.makeTranslation(0,0,-200);

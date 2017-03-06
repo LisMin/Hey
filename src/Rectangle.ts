@@ -16,7 +16,7 @@ namespace HEY{
 
         gl:WebGLRenderingContext = null;
 
-        transform:Matrix4 = null;
+        translate_matrix:Matrix4 = null;
 
         deltaX:number = 0;
 
@@ -25,6 +25,9 @@ namespace HEY{
         loc_projection:number = -1;
 
         loc_texture:number = -1;
+
+        rotation_matrix:Matrix4 = new Matrix4();
+        scale_matrix:Matrix4 = new Matrix4();
 
         constructor(){
             let gl = Scene.gl;
@@ -46,16 +49,16 @@ namespace HEY{
             let indices = new Uint16Array([
                 0,1,2,
                 2,1,3,
-                4,5,7,
-                4,7,6,
-                4,1,5,
-                0,1,4,
-                6,7,3,
-                2,6,3,
-                2,0,4,
-                2,4,6,
-                1,5,7,
-                1,7,3
+                // 4,5,7,
+                // 4,7,6,
+                // 4,1,5,
+                // 0,1,4,
+                // 6,7,3,
+                // 2,6,3,
+                // 2,0,4,
+                // 2,4,6,
+                // 1,5,7,
+                // 1,7,3
             ]);
 
             let ebo = gl.createBuffer();
@@ -118,7 +121,7 @@ namespace HEY{
 
             this.gl = gl;
 
-            this.transform = new THREE.Matrix4();
+            this.translate_matrix = new THREE.Matrix4();
 
             this.loc_model = gl.getUniformLocation(this.program,"model");
             this.loc_view = gl.getUniformLocation(this.program,"view");
@@ -139,9 +142,9 @@ namespace HEY{
             gl.uniform1i(loc,1);
 
             this.deltaX += 0.01;
-            this.transform.makeRotationX(this.deltaX);
             let loc_transform = this.loc_model;
-            gl.uniformMatrix4fv(loc_transform,false,this.transform.elements);
+            gl.uniformMatrix4fv(loc_transform,false,this.translate_matrix.clone().multiply(this.rotation_matrix)
+                .multiply(this.scale_matrix).elements);
 
             let viewMatrix = new THREE.Matrix4();
             viewMatrix.makeTranslation(0,0,-100);
@@ -152,7 +155,7 @@ namespace HEY{
             gl.uniformMatrix4fv(this.loc_projection,false,projectionMatrix.elements);
 
             gl.bindVertexArray(this.vao);
-            gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0);
+            gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
 
             gl.bindVertexArray(null);
         }

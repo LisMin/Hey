@@ -91,6 +91,7 @@ namespace HEY.ShaderLib{
             void main()
             {
                 color = texture(ourTexture,texCoord);
+                // color = vec4(vec3(gl_FragCoord.z),1.);
             }
 
         `;

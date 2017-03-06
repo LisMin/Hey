@@ -11,6 +11,8 @@ namespace HEY.Scene{
 
     let box:Box = null;
 
+    let children:any[] = [];
+
     export function init(){
         let  canvas = document.getElementById("render_canvas") as HTMLCanvasElement;
         canvas.width = window.innerWidth;
@@ -20,19 +22,29 @@ namespace HEY.Scene{
         gl = renderer.gl;
 
         rectangle = new HEY.Rectangle();
+        rectangle.rotation_matrix.makeRotationX(Math.PI/2);
+        rectangle.translate_matrix.makeTranslation(0,-10,0);
+        rectangle.scale_matrix.makeScale(10,10,10);
+        children.push(rectangle);
+
         triangle = new HEY.Triangle();
         box = new HEY.Box();
-    }
+        box.translate_matrix.makeTranslation(60,0,0);
+        children.push(box);
 
+        let box1 = new HEY.Box();
+        box1.translate_matrix.makeTranslation(-10,0,0);
+        children.push(box1);
+    }
 
     export function render(){
         gl.enable(gl.DEPTH_TEST);
         gl.clearColor(1,1,1,1);
         gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
-        // triangle.render();
-        // rectangle.render();
-        box.render();
+        for(let i = 0;i < children.length;i++){
+            children[i].render();
+        }
     }
 
 }
