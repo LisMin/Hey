@@ -2,8 +2,11 @@
  * Created by ll on 2017/3/1.
  */
 
+/// <reference path = "../node_modules/@types/three/index.d.ts" />
+
 namespace HEY{
 
+    import Matrix4 = THREE.Matrix4;
     export class Rectangle{
 
         program:WebGLProgram = null;
@@ -13,20 +16,46 @@ namespace HEY{
 
         gl:WebGLRenderingContext = null;
 
+        transform:Matrix4 = null;
+
+        deltaX:number = 0;
+
+        loc_model:number = -1;
+        loc_view:number = -1;
+        loc_projection:number = -1;
+
+        loc_texture:number = -1;
+
         constructor(){
             let gl = Scene.gl;
 
             let vertices = new Float32Array([
                 //position     //colors        //uvs
-                -0.2,0.2,0,    1.0,0.,0.,     0.,1.,
-                -0.2,-0.2,0,   0.,1.,0.,      0.,0.,
-                0.2,0.2,0,     0.,0.,1.,      1.,1.,
-                0.2,-0.2,0 ,    1.,1., 0.,    1.,0.,
+                -20,20,0,    100.0,0.,0.,     0.,1.,
+                -20,-20,0,   0.,100.,0.,      0.,0.,
+                20,20,0,     0.,0.,1.,      1.,1.,
+                20,-20,0 ,    100.,100., 0.,    1.,0.,
+
+                -20,20,40,    100.0,0.,0.,     0.,1.,
+                -20,-20,40,   0.,100.,0.,      0.,0.,
+                20,20,40,     0.,0.,1.,      1.,1.,
+                20,-20,40 ,    100.,100., 0.,    1.,0.,
+
             ]);
 
             let indices = new Uint16Array([
                 0,1,2,
-                2,1,3
+                2,1,3,
+                4,5,7,
+                4,7,6,
+                4,1,5,
+                0,1,4,
+                6,7,3,
+                2,6,3,
+                2,0,4,
+                2,4,6,
+                1,5,7,
+                1,7,3
             ]);
 
             let ebo = gl.createBuffer();
@@ -65,7 +94,7 @@ namespace HEY{
             gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
 
-            let data = new Uint8Array([255,255,255,255]);
+            let data = new Uint8Array([255,0,255,255]);
 
             let image = document.createElement("img");
             image.src = "../asset/wall.jpg";
@@ -82,7 +111,6 @@ namespace HEY{
             this.texture = texture;
 
 
-
             let shader = new Shader(ShaderLib.v_rectangle,ShaderLib.f_rectangle);
 
             this.program = shader.getWebglProgram();
@@ -90,22 +118,41 @@ namespace HEY{
 
             this.gl = gl;
 
+            this.transform = new THREE.Matrix4();
 
+            this.loc_model = gl.getUniformLocation(this.program,"model");
+            this.loc_view = gl.getUniformLocation(this.program,"view");
+            this.loc_projection = gl.getUniformLocation(this.program,"projection");
+
+            this.loc_texture = gl.getUniformLocation(this.program,"ourTexture");
 
         }
 
-        render(){
-
+        render(  ){
             let gl:any = this.gl;
+
             gl.useProgram(this.program);
-            
+
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D,this.texture);
-            let loc = gl.getUniformLocation(this.program,"ourTexture");
+            let loc = this.loc_texture;
             gl.uniform1i(loc,1);
 
+            this.deltaX += 0.01;
+            this.transform.makeRotationX(this.deltaX);
+            let loc_transform = this.loc_model;
+            gl.uniformMatrix4fv(loc_transform,false,this.transform.elements);
+
+            let viewMatrix = new THREE.Matrix4();
+            viewMatrix.makeTranslation(0,0,-100);
+            gl.uniformMatrix4fv(this.loc_view,false,viewMatrix.elements);
+
+            let camera = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,1000);
+            let projectionMatrix = camera.projectionMatrix;
+            gl.uniformMatrix4fv(this.loc_projection,false,projectionMatrix.elements);
+
             gl.bindVertexArray(this.vao);
-            gl.drawElements(gl.TRIANGLES,6,gl.UNSIGNED_SHORT,0);
+            gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0);
 
             gl.bindVertexArray(null);
         }
